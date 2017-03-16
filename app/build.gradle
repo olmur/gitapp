@@ -27,8 +27,6 @@ android {
     }
 }
 
-
-
 ext {
     supportLibraryVersion = '25.2.0'
     rxJavaVersion = '2.0.1'
