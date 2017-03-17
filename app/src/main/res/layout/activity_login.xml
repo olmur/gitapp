@@ -1,93 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                 xmlns:tools="http://schemas.android.com/tools"
-                                                 android:layout_width="match_parent"
-                                                 android:layout_height="match_parent">
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <FrameLayout
-            android:id="@+id/appBar"
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:layout_alignParentTop="true"
-            android:background="@color/colorPrimary"
-            android:elevation="16dp"
-            android:fitsSystemWindows="true"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-            <TextView
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/root"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:padding="16dp"
-                android:text="@string/app_name"
-                android:textAppearance="@style/ExtraLargeText"/>
-        </FrameLayout>
+                android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/expandable_frame"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimary"
+        android:elevation="16dp"
+        android:fitsSystemWindows="true"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <TextView
-            android:id="@+id/error_tv"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_below="@id/appBar"
-            android:background="@color/mid_grey"
-            android:gravity="center"
-            android:text="@string/error_login"
-            android:textColor="@color/error_red"
-            android:visibility="invisible"
-            tools:visibility="visible"/>
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/username_til"
-            android:layout_width="match_parent"
+            android:id="@+id/app_name_tv"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/error_tv"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp">
+            android:layout_gravity="bottom|start"
+            android:padding="16dp"
+            android:text="@string/app_name"
+            android:textAppearance="@style/ExtraLargeText"/>
 
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/username_tiet"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/username"
-                android:inputType="text"
-                android:lines="1"
-                android:nextFocusDown="@+id/password_tiet"/>
+    </FrameLayout>
 
-        </android.support.design.widget.TextInputLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@id/expandable_frame">
 
-        <android.support.v4.widget.Space
+        <View
+            android:id="@+id/wave_animated_circle"
             android:layout_width="match_parent"
-            android:layout_height="8dp"/>
+            android:layout_height="match_parent"
+            android:layout_margin="16dp"
+            android:background="@drawable/circle"/>
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/password_til"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/username_til"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp">
-
-            <android.support.design.widget.TextInputEditText
-                android:id="@id/password_tiet"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/password"
-                android:inputType="textPassword"
-                android:lines="1"/>
-
-        </android.support.design.widget.TextInputLayout>
-
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/login_fab"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center"
+            android:layout_margin="16dp"
+            android:tint="@android:color/white"
+            app:srcCompat="@drawable/ic_ok"/>
 
         <FrameLayout
             android:id="@+id/loading_reveal_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignParentBottom="true"
-            android:layout_below="@id/appBar"
             android:background="@color/colorAccent"
             android:visibility="invisible">
 
@@ -100,16 +64,15 @@
 
         </FrameLayout>
 
+    </FrameLayout>
 
-    </RelativeLayout>
+    <WebView
+        android:id="@+id/web_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@id/expandable_frame"
+        android:visibility="gone"/>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/login_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:tint="@android:color/white"
-        app:srcCompat="@drawable/ic_ok"/>
 
-</android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>

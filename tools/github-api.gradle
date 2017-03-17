@@ -1,0 +1,27 @@
+
+def getClientId() {
+    Properties properties = new Properties()
+    properties.load(new File(rootDir.absolutePath + "/local.properties").newDataInputStream())
+    def clientId = properties.getProperty('GITHUB_CLIENT_ID', null)
+    if (clientId == null) {
+        throw new GradleException(
+                "GitHub client id not found. Define GITHUB_CLIENT_ID in the local.properties file!")
+    }
+    return clientId
+}
+
+def getClientSecret() {
+    Properties properties = new Properties()
+    properties.load(new File(rootDir.absolutePath + "/local.properties").newDataInputStream())
+    def clientSecret = properties.getProperty('GITHUB_CLIENT_SECRET', null)
+    if (clientSecret == null) {
+        throw new GradleException(
+                "GitHub client secret not found. Define GITHUB_CLIENT_SECRET in the local.properties file!")
+    }
+    return clientSecret
+}
+
+ext {
+    GITHUB_CLIENT_ID = getClientId()
+    GITHUB_CLIENT_SECRET = getClientSecret()
+}
