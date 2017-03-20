@@ -2,7 +2,6 @@ package com.olmur.gitapp.presentation.screen.login;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -32,6 +31,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.olmur.gitapp.presentation.screen.AnimationProvider.getFadeOutAnimator;
+
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
@@ -52,6 +53,8 @@ public class LoginActivity extends AppCompatActivity {
     TextView mAppNameTv;
     @BindView(R.id.wave_animated_circle)
     View mWaveAnimatedCircleV;
+
+    private Snackbar mAuthorizeAppSnackBar;
 
     private int mExpandFrameHeight;
     private int mCollapseFrameHeight;
@@ -84,36 +87,26 @@ public class LoginActivity extends AppCompatActivity {
 
     @OnClick(R.id.login_fab)
     public void loginButtonPressed() {
-        renderLoading();
+        renderLoading().start();
     }
 
-    public void renderWebViewOpen() {
-        Animator fadeInAnimator = AnimationProvider.getFadeInAnimator(mWebView, 200, new AnimatorListenerAdapter() {
+    public Animator renderWebViewOpen() {
+        Animator fadeIn = AnimationProvider.getFadeInAnimator(mWebView, 200, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                Snackbar authBar = Snackbar.make(mRoot, "Grand GitApp access to your account", Snackbar.LENGTH_INDEFINITE);
-                authBar.setAction("Cancel", v -> {
-                    renderWebViewClose();
-                });
-                authBar.show();
+                mAuthorizeAppSnackBar = Snackbar.make(mRoot, "Grand GitApp access to your account", Snackbar.LENGTH_INDEFINITE);
+                mAuthorizeAppSnackBar.setAction("Cancel", v -> renderWebViewClose().start());
+                mAuthorizeAppSnackBar.show();
             }
         });
-        fadeInAnimator.start();
+        return AnimationProvider
+                .animationSequence(renderFrameCollapse(null), fadeIn);
     }
 
-    public void renderWebViewClose() {
-        Animator fadeOutAnimator = AnimationProvider.getFadeOutAnimator(mWebView, 200, new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                renderFrameExpand(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        renderLoadingCancel();
-                    }
-                });
-            }
-        });
-        fadeOutAnimator.start();
+    public Animator renderWebViewClose() {
+        mAuthorizeAppSnackBar.dismiss();
+        Animator fadeOut = AnimationProvider.getFadeOutAnimator(mWebView, 200, null);
+        return AnimationProvider.animationSequence(fadeOut, renderFrameExpand(null), renderLoadingCancel());
     }
 
     public void makeAuthorizeRequest() {
@@ -130,9 +123,9 @@ public class LoginActivity extends AppCompatActivity {
                         public void onResponse(Call<Token> call, Response<Token> response) {
                             Log.d(TAG, "GitHub Access Token: " + response.body().getAccessToken());
                             if (mWebView.getVisibility() == View.VISIBLE) {
-                                renderWebViewClose();
+                                renderWebViewClose().start();
                             } else {
-                                renderLoadingCancel();
+                                renderLoadingCancel().start();
                             }
                         }
 
@@ -140,31 +133,28 @@ public class LoginActivity extends AppCompatActivity {
                         public void onFailure(Call<Token> call, Throwable t) {
                             Log.e(TAG, "onFailure: ", t);
                             if (mWebView.getVisibility() == View.VISIBLE) {
-                                renderWebViewClose();
+                                renderWebViewClose().start();
                             } else {
-                                renderLoadingCancel();
+                                renderLoadingCancel().start();
                             }
                         }
                     });
 
                 } else {
                     view.loadUrl(url);
-                    renderFrameCollapse(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            renderWebViewOpen();
-                        }
-                    });
+                    if (mWebView.getVisibility() != View.VISIBLE) {
+                        renderWebViewOpen().start();
+                    }
                 }
                 return true;
             }
         });
     }
 
-    public void renderLoading() {
+    public Animator renderLoading() {
         // get the center start point for reveal animation
-        int cx = mLoadingReveal.getMeasuredWidth() / 2;
-        int cy = mLoadingReveal.getMeasuredHeight() / 2;
+        int cx = mLoadingReveal.getWidth() / 2;
+        int cy = mLoadingReveal.getWidth() / 2;
         // get view diagonal
         int endRadius = (int) Math.sqrt(Math.pow(mLoadingReveal.getWidth(), 2) + Math.pow(mLoadingReveal.getHeight(), 2));
         Animator fadeInAnimator = AnimationProvider.getFadeInAnimator(mLoadingAnimationView, 200, new AnimatorListenerAdapter() {
@@ -182,15 +172,13 @@ public class LoginActivity extends AppCompatActivity {
                 mLoginFab.hide();
             }
         });
-        AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playSequentially(revealAnimator, fadeInAnimator);
-        animatorSet.start();
+        return AnimationProvider.animationSequence(revealAnimator, fadeInAnimator);
     }
 
-    public void renderLoadingCancel() {
+    public Animator renderLoadingCancel() {
         // get the center start point for reveal animation
-        int cx = mLoadingReveal.getMeasuredWidth() / 2;
-        int cy = mLoadingReveal.getMeasuredHeight() / 2;
+        int cx = mLoadingReveal.getWidth() / 2;
+        int cy = mLoadingReveal.getWidth() / 2;
         // get view diagonal
         int startRadius = (int) Math.sqrt(Math.pow(mLoadingReveal.getWidth(), 2) + Math.pow(mLoadingReveal.getHeight(), 2));
 
@@ -201,29 +189,20 @@ public class LoginActivity extends AppCompatActivity {
                 mLoginFab.show();
             }
         });
-        Animator fadeOutAnimator = AnimationProvider.getFadeOutAnimator(mLoadingAnimationView, 200, new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                revealAnimator.start();
-            }
-        });
-        fadeOutAnimator.start();
+        Animator fadeOutAnimator = getFadeOutAnimator(mLoadingAnimationView, 200, null);
+        return AnimationProvider.animationSequence(fadeOutAnimator, revealAnimator);
     }
 
-    public void renderFrameExpand(@Nullable AnimatorListenerAdapter listenerAdapter) {
+    public Animator renderFrameExpand(@Nullable AnimatorListenerAdapter listenerAdapter) {
         Animator expandAnimator = AnimationProvider.getHeightChangeAnimator(mExpandableFrame, mCollapseFrameHeight, mExpandFrameHeight, 300, listenerAdapter);
         Animator textSizeBiggerAnimator = AnimationProvider.getTextSizeAnimator(mAppNameTv, mCollapsedAppNameTextSize, mExpandedAppNameTextSize, 300, null);
-        AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(expandAnimator, textSizeBiggerAnimator);
-        animatorSet.start();
+        return AnimationProvider.animationParallel(expandAnimator, textSizeBiggerAnimator);
     }
 
-    public void renderFrameCollapse(@Nullable AnimatorListenerAdapter listener) {
+    public Animator renderFrameCollapse(@Nullable AnimatorListenerAdapter listener) {
         mExpandFrameHeight = mExpandableFrame.getHeight();
         Animator collapseAnimator = AnimationProvider.getHeightChangeAnimator(mExpandableFrame, mExpandFrameHeight, mCollapseFrameHeight, 300, listener);
         Animator textSizeSmallerAnimator = AnimationProvider.getTextSizeAnimator(mAppNameTv, mExpandedAppNameTextSize, mCollapsedAppNameTextSize, 300, null);
-        AnimatorSet collapseSet = new AnimatorSet();
-        collapseSet.playTogether(collapseAnimator, textSizeSmallerAnimator);
-        collapseSet.start();
+        return AnimationProvider.animationParallel(collapseAnimator, textSizeSmallerAnimator);
     }
 }

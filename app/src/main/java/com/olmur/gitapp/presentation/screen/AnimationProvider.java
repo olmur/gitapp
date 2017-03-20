@@ -3,6 +3,7 @@ package com.olmur.gitapp.presentation.screen;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.support.annotation.NonNull;
@@ -13,6 +14,18 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.TextView;
 
 public class AnimationProvider {
+
+    public static Animator animationSequence(Animator...animators) {
+        AnimatorSet sequence = new AnimatorSet();
+        sequence.playSequentially(animators);
+        return sequence;
+    }
+
+    public static Animator animationParallel(Animator...animators) {
+        AnimatorSet parallel = new AnimatorSet();
+        parallel.playTogether(animators);
+        return parallel;
+    }
 
     public static ObjectAnimator getFadeInAnimator(@NonNull View target, long duration, @Nullable Animator.AnimatorListener listener) {
         ObjectAnimator fadeInAnimator = ObjectAnimator.ofFloat(target, View.ALPHA, 0f, 1f);
@@ -51,6 +64,7 @@ public class AnimationProvider {
     public static Animator getRevealAnimator(@NonNull View target, int cx, int cy, int startRadius, int endRadius, long duration, @Nullable Animator.AnimatorListener listener) {
         Animator revealAnimator = ViewAnimationUtils.createCircularReveal(target, cx, cy, startRadius, endRadius);
         revealAnimator.setDuration(duration);
+
         if (listener != null) {
             revealAnimator.addListener(listener);
         }
