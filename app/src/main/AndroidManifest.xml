@@ -21,6 +21,8 @@
 
         </activity>
 
+        <activity android:name=".presentation.screen.profile.ProfileActivity"/>
+
     </application>
 
 </manifest>

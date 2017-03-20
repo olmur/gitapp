@@ -22,7 +22,7 @@
             android:layout_gravity="bottom|start"
             android:padding="16dp"
             android:text="@string/app_name"
-            android:textAppearance="@style/ExtraLargeText"/>
+            android:textAppearance="@style/ExtraLargeTextPrimary"/>
 
     </FrameLayout>
 

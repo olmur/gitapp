@@ -2,7 +2,9 @@ package com.olmur.gitapp.presentation.screen.login;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -22,6 +24,7 @@ import com.olmur.gitapp.R;
 import com.olmur.gitapp.entity.Token;
 import com.olmur.gitapp.network.NetworkManager;
 import com.olmur.gitapp.presentation.screen.AnimationProvider;
+import com.olmur.gitapp.presentation.screen.profile.ProfileActivity;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import butterknife.BindView;
@@ -121,11 +124,19 @@ public class LoginActivity extends AppCompatActivity {
                     NetworkManager.getGitHubAuth().authorize(BuildConfig.GITHUB_CLIENT_ID, BuildConfig.GITHUB_CLIENT_SECRET, responseCode).enqueue(new Callback<Token>() {
                         @Override
                         public void onResponse(Call<Token> call, Response<Token> response) {
-                            Log.d(TAG, "GitHub Access Token: " + response.body().getAccessToken());
+                            String accessToken = response.body().getAccessToken();
+                            Log.d(TAG, "GitHub Access Token: " + accessToken);
+
+                            PreferenceManager.getDefaultSharedPreferences(LoginActivity.this)
+                                    .edit()
+                                    .putString(NetworkManager.AUTH_TOKEN_PREF, accessToken)
+                                    .apply();
+
                             if (mWebView.getVisibility() == View.VISIBLE) {
                                 renderWebViewClose().start();
                             } else {
                                 renderLoadingCancel().start();
+                                startActivity(new Intent(LoginActivity.this, ProfileActivity.class));
                             }
                         }
 
